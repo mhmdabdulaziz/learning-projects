@@ -4,44 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Quiz Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Form Validator</title>
 </head>
 <body>
     <div class="container">
-        <div class="screen active" id="start-screen">
-            <h1>Quiz Time!</h1>
-            <p>Test your knowledge with these fun quistions</p>
-            <button id="start-btn">Start Quiz</button>
-        </div>
-        <div class="screen" id="quiz-screen">
-            <div class="quiz-header">
-                <h1 id="question-text">Question goes here</h1>
-                <div class="quiz-info">
-                    <p>
-                        Question <span id="current-question">1</span> of <span id="total-questions">5</span>
-                    </p>
-                    <p>Score: <span id="score">0</span></p>
+        <form id="registration-form">
+            <h1>Register</h1>
+            <!-- Username -->
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" placeholder="Enter username">
+                <small></small>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" placeholder="Enter your email">
+                <small></small>
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-container">
+                    <input type="password" name="password" id="password" placeholder="Enter your password">
+                    <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('password', this)"></i>
                 </div>
+                <small></small>
             </div>
 
-            <div id="answers-container" class="answers-container">
-                <!-- Answers buttons will be inserted here from my JS code -->
+            <!-- Confirm Password -->
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <div class="password-container">
+                    <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Enter your password">
+                    <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('confirmPassword', this)"></i>
+                </div>
+                <small></small>
             </div>
 
-            <div class="progress-bar">
-                <div class="progress" id="progress"></div>
-            </div>
-        </div>
-        <div class="screen" id="result-screen">
-            <h1>Quiz Results</h1>
-            <div class="result-info">
-                <p>You scored <span id="final-score">0</span> out of 
-                    <span id="max-score">5</span></p>
 
-                <div id="result-message">Good Job!</div>
-            </div>
-            <button id="restart-btn">Restart Quiz</button>
-        </div>
+            <!-- Submit Button -->
+            <button type="submit">Register</button>
+        </form>
     </div>
     
     <script src="./script.js"></script>

@@ -1,178 +1,115 @@
-// DOM Elements
-const startScreen = document.getElementById("start-screen");
-const quizScreen = document.getElementById("quiz-screen");
-const resultScreen = document.getElementById("result-screen");
-const startButton = document.getElementById("start-btn");
-const questionText = document.getElementById("question-text");
-const answersContainer = document.getElementById("answers-container");
-const currentQuestionSpan = document.getElementById("current-question");
-const totalQuestionsSpan = document.getElementById("total-questions");
-const scoreSpan = document.getElementById("score");
-const finalScoreSpan = document.getElementById("final-score");
-const maxScoreSpan = document.getElementById("max-score");
-const resultMessage = document.getElementById("result-message");
-const restartButton = document.getElementById("restart-btn");
-const progressBar = document.getElementById("progress");
+const form = document.getElementById("registration-form");
+const username = document.getElementById("username");
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const confirmPassword = document.getElementById("confirmPassword");
 
-const quizQuestions = [
-  {
-    question: "What is the capital of France?",
-    answers: [
-      { text: "London", correct: false },
-      { text: "Berlin", correct: false },
-      { text: "Paris", correct: true },
-      { text: "Madrid", correct: false },
-    ],
-  },
-  {
-    question: "Which planet is known as the Red Planet?",
-    answers: [
-      { text: "Venus", correct: false },
-      { text: "Mars", correct: true },
-      { text: "Jupiter", correct: false },
-      { text: "Saturn", correct: false },
-    ],
-  },
-  {
-    question: "What is the largest ocean on Earth?",
-    answers: [
-      { text: "Atlantic Ocean", correct: false },
-      { text: "Indian Ocean", correct: false },
-      { text: "Arctic Ocean", correct: false },
-      { text: "Pacific Ocean", correct: true },
-    ],
-  },
-  {
-    question: "Which of these is NOT a programming language?",
-    answers: [
-      { text: "Java", correct: false },
-      { text: "Python", correct: false },
-      { text: "Banana", correct: true },
-      { text: "JavaScript", correct: false },
-    ],
-  },
-  {
-    question: "What is the chemical symbol for gold?",
-    answers: [
-      { text: "Go", correct: false },
-      { text: "Gd", correct: false },
-      { text: "Au", correct: true },
-      { text: "Ag", correct: false },
-    ],
-  },
-];
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
 
-// QUIZ STATE VARS
-let currentQuestionIndex = 0;
-let score = 0;
-let answersDisabled = false;
+  const isRequiredValid = checkRequired([username, email, password, confirmPassword]);
 
-totalQuestionsSpan.textContent = quizQuestions.length;
-maxScoreSpan.textContent = quizQuestions.length;
+  let isFormValid = isRequiredValid;
 
-// event listeners
-startButton.addEventListener("click", startQuiz);
-restartButton.addEventListener("click", restartQuiz);
+  if (isRequiredValid) {
+    const isUsernameValid = checkLength(username, 3, 15);
+    const isEmailValid = checkEmail(email);
+    const isPasswordValid = checkLength(password, 6, 25);
+    const isPasswordsMatch = checkPasswordsMatch(password, confirmPassword);
 
-function startQuiz() {
-  // reset vars
-  currentQuestionIndex = 0;
-  score = 0;
-  scoreSpan.textContent = 0;
-
-  startScreen.classList.remove("active");
-  quizScreen.classList.add("active");
-
-  showQuestion();
-}
-
-function showQuestion() {
-  // reset state
-  answersDisabled = false;
-
-  const currentQuestion = quizQuestions[currentQuestionIndex];
-
-  currentQuestionSpan.textContent = currentQuestionIndex + 1;
-
-  const progressPercent = (currentQuestionIndex / quizQuestions.length) * 100;
-  progressBar.style.width = progressPercent + "%";
-
-  questionText.textContent = currentQuestion.question;
-
-  answersContainer.innerHTML = "";
-
-  currentQuestion.answers.forEach((answer) => {
-    const button = document.createElement("button");
-    button.textContent = answer.text;
-    button.classList.add("answer-btn");
-
-    // what is dataset? it's a property of the button element that allows you to store custom data
-    button.dataset.correct = answer.correct;
-
-    button.addEventListener("click", selectAnswer);
-
-    answersContainer.appendChild(button);
-  });
-}
-
-function selectAnswer(event) {
-  // optimization check
-  if (answersDisabled) return;
-
-  answersDisabled = true;
-
-  const selectedButton = event.target;
-  const isCorrect = selectedButton.dataset.correct === "true";
-
-  // Here Array.from() is used to convert the NodeList returned by answersContainer.children into an array, this is because the NodeList is not an array and we need to use the forEach method
-  Array.from(answersContainer.children).forEach((button) => {
-    if (button.dataset.correct === "true") {
-      button.classList.add("correct");
-    } else if (button === selectedButton) {
-      button.classList.add("incorrect");
-    }
-  });
-
-  if (isCorrect) {
-    score++;
-    scoreSpan.textContent = score;
+    isFormValid = isUsernameValid && isEmailValid && isPasswordValid && isPasswordsMatch;
   }
 
-  setTimeout(() => {
-    currentQuestionIndex++;
+  if (isFormValid) {
+    alert("Registration successful!");
+    form.reset();
 
-    // check if there are more questions or if the quiz is over
-    if (currentQuestionIndex < quizQuestions.length) {
-      showQuestion();
+    // Reset form-group classes
+    document.querySelectorAll(".form-group").forEach((group) => {
+      group.classList.remove("success", "error");
+    });
+  }
+});
+
+// Show error inside form-group (even if input is wrapped)
+function showError(input, message) {
+  const formGroup = input.closest(".form-group");
+  formGroup.classList.remove("success");
+  formGroup.classList.add("error");
+  const small = formGroup.querySelector("small");
+  small.innerText = message;
+}
+
+// Show success
+function showSuccess(input) {
+  const formGroup = input.closest(".form-group");
+  formGroup.classList.remove("error");
+  formGroup.classList.add("success");
+
+  const small = formGroup.querySelector("small");
+  if (small) small.innerText = "";  // Clear the message
+}
+
+// Check required fields
+function checkRequired(inputs) {
+  let isValid = true;
+  inputs.forEach((input) => {
+    if (input.value.trim() === "") {
+      showError(input, `${formatFieldName(input)} is required`);
+      isValid = false;
     } else {
-      showResults();
+      showSuccess(input);
     }
-  }, 1000);
+  });
+  return isValid;
 }
 
-function showResults() {
-  quizScreen.classList.remove("active");
-  resultScreen.classList.add("active");
-
-  finalScoreSpan.textContent = score;
-
-  const percentage = (score / quizQuestions.length) * 100;
-
-  if (percentage === 100) {
-    resultMessage.textContent = "Perfect! You're a genius!";
-  } else if (percentage >= 80) {
-    resultMessage.textContent = "Great job! You know your stuff!";
-  } else if (percentage >= 60) {
-    resultMessage.textContent = "Good effort! Keep learning!";
-  } else if (percentage >= 40) {
-    resultMessage.textContent = "Not bad! Try again to improve!";
+// Validate input length
+function checkLength(input, min, max) {
+  const value = input.value.trim();
+  if (value.length < min) {
+    showError(input, `${formatFieldName(input)} must be at least ${min} characters.`);
+    return false;
+  } else if (value.length > max) {
+    showError(input, `${formatFieldName(input)} must be less than ${max} characters.`);
+    return false;
   } else {
-    resultMessage.textContent = "Keep studying! You'll get better!";
+    showSuccess(input);
+    return true;
   }
 }
 
-function restartQuiz() {
-  resultScreen.classList.remove("active");
+// Validate email
+function checkEmail(input) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (emailRegex.test(input.value.trim())) {
+    showSuccess(input);
+    return true;
+  } else {
+    showError(input, "Email is not valid");
+    return false;
+  }
+}
 
-  startQuiz();
+// Password match
+function checkPasswordsMatch(pw, confirmPw) {
+  if (pw.value !== confirmPw.value) {
+    showError(confirmPw, "Passwords do not match");
+    return false;
+  }
+  return true;
+}
+
+// Toggle password visibility
+function togglePassword(id, icon) {
+  const input = document.getElementById(id);
+  const isHidden = input.type === "password";
+  input.type = isHidden ? "text" : "password";
+  icon.classList.toggle("fa-eye");
+  icon.classList.toggle("fa-eye-slash");
+}
+
+// Capitalize label from input ID
+function formatFieldName(input) {
+  return input.id.charAt(0).toUpperCase() + input.id.slice(1);
 }
